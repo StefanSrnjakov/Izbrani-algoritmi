@@ -1,6 +1,0 @@
-1. graficni vmesnik
-2. Implementacija SuperDuper LCG
-3. Naivna metoda
-4. Miller-Rabinov test
-5. Implementacija modulskega potenciranja
-6. Analiza časovne zahtevnosti za obe metod
