@@ -22,16 +22,3 @@ export const measureExecutionTime = (fn: () => number): number => {
     return end - start;
 };
 
-export const modularExponentiation = (a: bigint, b: bigint, n: bigint): number => {
-    let d = BigInt(1);
-
-    while (b > BigInt(0)) {
-        if (b & BigInt(1)) {
-            d = (d * a) % n;
-        }
-        a = (a * a) % n;
-        b = b >> BigInt(1);
-    }
-
-    return Number(d);
-};
