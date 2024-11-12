@@ -1,4 +1,3 @@
-// Decryption.tsx
 import React, { useState } from 'react';
 import { Button, TextField, Typography, Grid, Card, CardContent, Box } from '@mui/material';
 import { useDecryption } from '../hooks/useDecryption';
@@ -37,11 +36,11 @@ const Decryption: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${fileToDecrypt?.name || 'decrypted'}.dec`; // Save with .dec extension
+      link.download = `${fileToDecrypt?.name.replace(/\.enc$/, '') || 'decrypted'}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url); // Free memory
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -59,7 +58,6 @@ const Decryption: React.FC = () => {
               Select the encrypted file and your private key to decrypt.
             </Typography>
 
-            {/* File input for the encrypted file */}
             <TextField
               fullWidth
               variant="outlined"
@@ -76,7 +74,6 @@ const Decryption: React.FC = () => {
               }}
             />
 
-            {/* File input for the private key */}
             <TextField
               fullWidth
               variant="outlined"

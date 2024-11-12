@@ -6,7 +6,7 @@ import Home from './pages/Home/Home';
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
   },
 });
 

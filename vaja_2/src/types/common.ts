@@ -9,3 +9,8 @@ export interface PerformanceData {
     encryptionTime: number;
     decryptionTime: number;
 }
+
+export interface PublicKey {
+    n: string;
+    e: string;
+  }
