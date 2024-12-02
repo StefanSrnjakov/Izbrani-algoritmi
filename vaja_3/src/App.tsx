@@ -2,14 +2,11 @@
 import React from 'react';
 import { ThemeProvider, createTheme, CssBaseline, Container, Box } from '@mui/material';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
 import Home from './pages/Home/Home';
-import About from './pages/About';
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
   },
 });
 
@@ -18,7 +15,7 @@ const App: React.FC = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <Header />
+        {/* <Header /> */}
         <Container>
           <Box
             display="flex"
@@ -30,12 +27,11 @@ const App: React.FC = () => {
             <Routes>
 
               <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
 
             </Routes>
           </Box>
         </Container>
-        <Footer />
+        {/* <Footer /> */}
       </Router>
     </ThemeProvider>
   );
