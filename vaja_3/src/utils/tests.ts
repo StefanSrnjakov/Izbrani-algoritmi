@@ -1,6 +1,7 @@
 import { areUint8ArraysEqual } from "./common";
 import { reconstructSecretByBytesRawInput, reconstructSecretRawInput } from "./reconstruction";
-import { secretSharingByBytesFromData, shamirMethodRawData } from "./secretSharing";
+import { shamirMethodRawData } from "./secretSharing";
+import { secretSharingByBytesFromData } from "./secretSharingBytes";
 
 interface AnalysisResponse {
     fileLength: number[];
