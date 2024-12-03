@@ -9,19 +9,16 @@ const Reconstruction: React.FC = () => {
   const [blobOutput, setBlobOutput] = useState<Blob | null>(null);
   const [useBytes, setUseBytes] = useState<boolean>(false); // State for approach selection
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const updatedFiles = [...files];
-      updatedFiles[index] = file;
-      setFiles(updatedFiles);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (selectedFiles) {
+      setFiles(Array.from(selectedFiles)); // Store selected files as an array
     }
   };
 
   const handleKChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     setK(value);
-    setFiles(new Array(value).fill(null)); // Initialize empty files array
   };
 
   const handleSubmit = async () => {
@@ -29,8 +26,8 @@ const Reconstruction: React.FC = () => {
       alert('Please enter a threshold value.');
       return;
     }
-    if (files.some((file) => !file)) {
-      alert('Please upload all share files.');
+    if (files.length < k) {
+      alert(`Please upload at least ${k} share files.`);
       return;
     }
 
@@ -78,33 +75,26 @@ const Reconstruction: React.FC = () => {
           margin="normal"
         />
       </Box>
-      {k && (
-        <Box>
-          <Typography variant="body1" gutterBottom>
-            Upload {k} share files:
-          </Typography>
-          {[...Array(k)].map((_, index) => (
-            <Box key={index} mb={2}>
-              <input
-                accept=".json"
-                style={{ display: 'none' }}
-                id={`file-input-${index}`}
-                type="file"
-                onChange={(event) => handleFileChange(event, index)}
-              />
-              <label htmlFor={`file-input-${index}`}>
-                <Button
-                  variant="outlined"
-                  component="span"
-                  fullWidth
-                >
-                  {files[index] ? `Uploaded: ${files[index].name}` : `Upload Share ${index + 1}`}
-                </Button>
-              </label>
-            </Box>
-          ))}
-        </Box>
-      )}
+      <Box mb={2}>
+        <Typography variant="body1" gutterBottom>
+          Upload share files:
+        </Typography>
+        <input
+          accept=".json"
+          style={{ display: 'none' }}
+          id="file-input"
+          type="file"
+          multiple
+          onChange={handleFileChange}
+        />
+        <label htmlFor="file-input">
+          <Button variant="outlined" component="span" fullWidth>
+            {files.length > 0
+              ? `Uploaded ${files.length} file(s)`
+              : 'Upload Share Files'}
+          </Button>
+        </label>
+      </Box>
       <Box mb={2}>
         <FormControlLabel
           control={

@@ -13,7 +13,8 @@ import {
   FormControl,
   FormLabel,
 } from '@mui/material';
-import { secretSharing, secretSharingByBytes } from '../utils/secretSharing';
+import { secretSharing } from '../utils/secretSharing';
+import { secretSharingByBytes } from '../utils/secretSharingBytes';
 
 const SharingSecrets: React.FC = () => {
   const [n, setN] = useState<number>(0);
