@@ -1,13 +1,17 @@
 import { areUint8ArraysEqual } from "./common";
-import { reconstructSecretByBytesRawInput, reconstructSecretRawInput } from "./reconstruction";
-import { shamirMethodRawData } from "./secretSharing";
+import { reconstructSecretByBytesRawInput, reconstructSecretRawInputRobust, reconstructSecret, reconstructSecretRawInput } from "./reconstruction";
+import { secretSharing, shamirMethodRawData } from "./secretSharing";
 import { secretSharingByBytesFromData } from "./secretSharingBytes";
 
-interface AnalysisResponse {
+export interface AnalysisResponse {
     fileLength: number[];
     secretSharingTimes: number[];
     reconstructionTimes: number[];
     dataMatchAfterReconstruction: boolean[];
+}
+export interface ReconstructionAnalysisResponse {
+    sharesPairs: { n: number; k: number }[];
+    correctPercentage: number[];
 }
 
 const generateRandomArray = (length: number): Uint8Array => {
@@ -37,7 +41,7 @@ export const secretSharingAnalysisBigInt = async (fileLength: number[], n: numbe
 
         // Measure reconstruction time
         const startReconstruction = performance.now();
-        const reconstructedData = reconstructSecretRawInput(shares, k);
+        const reconstructedData = reconstructSecretRawInputRobust(shares, k);
         const endReconstruction = performance.now();
         const reconstructionTime = endReconstruction - startReconstruction;
 
@@ -89,7 +93,44 @@ export const secretSharingAnalysisBytes = async (
         results.reconstructionTimes.push(reconstructionTime);
         results.dataMatchAfterReconstruction.push(isDataMatch);
     }
-    console.log(results);
     return results;
+};
+
+export const reconstructionRobustTest = async (
+    sharesNums: { n: number; k: number }[],
+    length: number,
+    retries = 10
+): Promise<ReconstructionAnalysisResponse> => {
+    const result: ReconstructionAnalysisResponse = {
+        sharesPairs: sharesNums,
+        correctPercentage: [],
+    };
+
+    for (const { n, k } of sharesNums) {
+        let correctCount = 0;
+
+        for (let retry = 0; retry < retries; retry++) {
+            // Generate random data
+            const randomData = generateRandomArray(length);
+
+            const shares = shamirMethodRawData(n, k, randomData);
+
+            try {
+                const reconstructedData = reconstructSecretRawInput(shares, k);
+
+                console.log(reconstructedData, randomData);
+                if (areUint8ArraysEqual(reconstructedData, randomData)) {
+                    correctCount++;
+                }
+            } catch (error: any) {
+                console.error(`Reconstruction failed for n=${n}, k=${k}, retry=${retry}:`, error.message);
+            }
+        }
+
+        const percentage = (correctCount / retries) * 100;
+        result.correctPercentage.push(percentage);
+    }
+
+    return result;
 };
 

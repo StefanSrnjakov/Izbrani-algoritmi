@@ -7,6 +7,7 @@ import Tab from '@mui/material/Tab';
 import SharingSecrets from '../../components/SharingSecrets';
 import Reconstruction from '../../components/Reconstruction';
 import Analysis from '../../components/Analysis';
+import AnalysisReconstruction from '../../components/AnalysisReconstruction';
 
 
 const HomePage: React.FC = () => {
@@ -29,6 +30,7 @@ const HomePage: React.FC = () => {
           <Tab label="Sharing Secrets" />
           <Tab label="Reconstruction" />
           <Tab label="Analysis" />
+          <Tab label="Analysis Reconstruction" />
         </Tabs>
       </Box>
       <Box>
@@ -36,6 +38,7 @@ const HomePage: React.FC = () => {
         {currentTab === 0 && <SharingSecrets />}
         {currentTab === 1 && <Reconstruction />}
         {currentTab === 2 && <Analysis />}
+        {currentTab === 3 && <AnalysisReconstruction />}
       </Box>
     </Container>
   );

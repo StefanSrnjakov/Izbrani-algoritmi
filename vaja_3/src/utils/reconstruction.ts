@@ -1,9 +1,9 @@
 export const reconstructSecret = async (files: File[], k: number): Promise<Uint8Array> => {
     const shares = await processShares(files);
-    const secret = reconstructSecretRawInput(shares, k);
+    const secret = reconstructSecretRawInputRobust(shares, k);
     return secret;
 };
-export const reconstructSecretRawInput = (shares: { x: number; f: bigint }[], k: number): Uint8Array => {
+export const reconstructSecretRawInputRobust = (shares: { x: number; f: bigint }[], k: number): Uint8Array => {
     if (shares.length < k) {
         throw new Error('Not enough shares to reconstruct the secret.');
     }
@@ -35,6 +35,33 @@ export const reconstructSecretRawInput = (shares: { x: number; f: bigint }[], k:
     S /= downGlobal;
     return convertBigIntToUint8Array(S);
 }
+
+export const reconstructSecretRawInput = (shares: { x: number; f: bigint }[], k: number): Uint8Array => {
+    if (shares.length < k) {
+        throw new Error('Not enough shares to reconstruct the secret.');
+    }
+
+    let S = BigInt(0);
+
+    // Loop through each share to calculate its contribution to S
+    for (let j = 0; j < k; j++) {
+        let numerator = BigInt(1);
+        let denominator = BigInt(1);
+
+        // Compute the Lagrange basis polynomial
+        for (let i = 0; i < k; i++) {
+            if (i !== j) {
+                numerator *= BigInt(shares[i].x);
+                denominator *= BigInt(shares[i].x - shares[j].x);
+            }
+        }
+
+        // Add the contribution of the current share
+        S += shares[j].f * numerator / denominator;
+    }
+
+    return convertBigIntToUint8Array(S);
+};
 export const processShares = async (files: File[]): Promise<{ x: number; f: bigint }[]> => {
     const shares: { x: number; f: bigint }[] = [];
 

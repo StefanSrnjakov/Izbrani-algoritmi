@@ -33,7 +33,7 @@ export const shamirMethodRawData = (n: number, k: number, uint8Array: Uint8Array
         for (let i = 1; i <= n; i++) {
             let share = BigInt(0);
             for (let j = 0; j < k; j++) {
-                const product = aArray[j] * BigInt(Math.pow(i, j));
+                const product = aArray[j] * BigInt(i) ** BigInt(j);
                 share += product;
             }
             D.push({ x: i, f: share });
@@ -42,6 +42,7 @@ export const shamirMethodRawData = (n: number, k: number, uint8Array: Uint8Array
         return D;
     } catch (error: any) {
         console.error("Error generating the shares:", error.message);
+        console.error(error);
         return []
     }
 };
