@@ -1,5 +1,5 @@
 import { areUint8ArraysEqual } from "./common";
-import { reconstructSecretByBytesRawInput, reconstructSecretRawInputRobust, reconstructSecret, reconstructSecretRawInput } from "./reconstruction";
+import { reconstructSecretByBytesRawInput, reconstructSecretRawInputRobust, reconstructSecret, reconstructSecretRawInput, reconstructSecretRawInputVcera } from "./reconstruction";
 import { secretSharing, shamirMethodRawData } from "./secretSharing";
 import { secretSharingByBytesFromData } from "./secretSharingBytes";
 
@@ -12,6 +12,7 @@ export interface AnalysisResponse {
 export interface ReconstructionAnalysisResponse {
     sharesPairs: { n: number; k: number }[];
     correctPercentage: number[];
+    correctBytesPercentage: number[];
 }
 
 const generateRandomArray = (length: number): Uint8Array => {
@@ -87,7 +88,6 @@ export const secretSharingAnalysisBytes = async (
 
         const isDataMatch = areUint8ArraysEqual(reconstructedData, randomData);
 
-        // console.log(randomData, reconstructedData);
         results.fileLength.push(length);
         results.secretSharingTimes.push(sharingTime);
         results.reconstructionTimes.push(reconstructionTime);
@@ -104,10 +104,13 @@ export const reconstructionRobustTest = async (
     const result: ReconstructionAnalysisResponse = {
         sharesPairs: sharesNums,
         correctPercentage: [],
+        correctBytesPercentage: [],
     };
 
     for (const { n, k } of sharesNums) {
         let correctCount = 0;
+        let totalCorrectBytes = 0;
+        let totalBytesCompared = 0;
 
         for (let retry = 0; retry < retries; retry++) {
             // Generate random data
@@ -118,17 +121,34 @@ export const reconstructionRobustTest = async (
             try {
                 const reconstructedData = reconstructSecretRawInput(shares, k);
 
-                console.log(reconstructedData, randomData);
+                // Check if the entire reconstruction matches
                 if (areUint8ArraysEqual(reconstructedData, randomData)) {
                     correctCount++;
+                } else {
+                    // console.group(`Reconstruction wrong for n=${n}, k=${k}, retry=${retry}`);
+                    // console.log('Expected:', randomData);
+                    // console.log('Actual:', reconstructedData);
+                    // console.groupEnd();
+                }
+
+                // Byte-by-byte comparison
+                for (let i = 0; i < randomData.length; i++) {
+                    if (reconstructedData[i] === randomData[i]) {
+                        totalCorrectBytes++;
+                    }
+                    totalBytesCompared++;
                 }
             } catch (error: any) {
                 console.error(`Reconstruction failed for n=${n}, k=${k}, retry=${retry}:`, error.message);
             }
         }
 
-        const percentage = (correctCount / retries) * 100;
-        result.correctPercentage.push(percentage);
+        // Calculate percentages
+        const correctReconstructionPercentage = (correctCount / retries) * 100;
+        const correctBytesPercentage = (totalCorrectBytes / totalBytesCompared) * 100;
+
+        result.correctPercentage.push(correctReconstructionPercentage);
+        result.correctBytesPercentage.push(correctBytesPercentage);
     }
 
     return result;

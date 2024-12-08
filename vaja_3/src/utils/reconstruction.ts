@@ -35,8 +35,8 @@ export const reconstructSecretRawInputRobust = (shares: { x: number; f: bigint }
     S /= downGlobal;
     return convertBigIntToUint8Array(S);
 }
-
-export const reconstructSecretRawInput = (shares: { x: number; f: bigint }[], k: number): Uint8Array => {
+export const reconstructSecretRawInputVcera = (shares: { x: number; f: bigint }[], k: number): Uint8Array => {
+    console.log('vcera');
     if (shares.length < k) {
         throw new Error('Not enough shares to reconstruct the secret.');
     }
@@ -58,6 +58,29 @@ export const reconstructSecretRawInput = (shares: { x: number; f: bigint }[], k:
 
         // Add the contribution of the current share
         S += shares[j].f * numerator / denominator;
+    }
+
+    return convertBigIntToUint8Array(S);
+};
+export const reconstructSecretRawInput = (shares: { x: number; f: bigint }[], k: number): Uint8Array => {
+    if (shares.length < k) {
+        throw new Error('Not enough shares to reconstruct the secret.');
+    }
+
+    let S = BigInt(0);
+
+    // Loop through each share to calculate its contribution to S
+    for (let j = 0; j < k; j++) {
+        let product = 1;
+        // Compute the Lagrange basis polynomial
+        for (let i = 0; i < k; i++) {
+            if (i !== j) {
+                product *= shares[i].x / (shares[i].x - shares[j].x);
+            }
+        }
+
+        // Add the contribution of the current share
+        S += shares[j].f * BigInt(Math.round(product));
     }
 
     return convertBigIntToUint8Array(S);

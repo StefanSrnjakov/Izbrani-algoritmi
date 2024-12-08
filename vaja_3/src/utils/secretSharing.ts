@@ -42,7 +42,6 @@ export const shamirMethodRawData = (n: number, k: number, uint8Array: Uint8Array
         return D;
     } catch (error: any) {
         console.error("Error generating the shares:", error.message);
-        console.error(error);
         return []
     }
 };

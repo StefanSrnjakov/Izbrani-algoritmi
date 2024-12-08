@@ -4,21 +4,36 @@ import { ReconstructionAnalysisResponse, reconstructionRobustTest } from '../uti
 import { Chart } from 'chart.js/auto';
 
 const Analysis: React.FC = () => {
-    const fileSize = 64;
+    const fileSize = 1000;
     const sharesNum = [
-        { n: 300, k: 50 },
+        { n: 30, k: 5 },
+        { n: 50, k: 10 },
+        { n: 70, k: 15 },
+        { n: 100, k: 20 },
+        { n: 150, k: 30 },
+        { n: 200, k: 40 },
+        { n: 250, k: 50 },
+        { n: 250, k: 52 },
+        { n: 250, k: 53 },
+        { n: 250, k: 54 },
+        { n: 300, k: 60 },
+        { n: 350, k: 70 },
+        { n: 400, k: 80 },
+        { n: 450, k: 90 },
+        { n: 500, k: 100 },
 
     ];
     const [loading, setLoading] = useState(false);
     const [bigIntResults, setBigIntResults] = useState<ReconstructionAnalysisResponse>({
         sharesPairs: sharesNum,
         correctPercentage: [],
+        correctBytesPercentage: [],
     });
 
     const startAnalysis = async () => {
         setLoading(true);
         try {
-            const results = await reconstructionRobustTest(sharesNum, fileSize, 30);
+            const results = await reconstructionRobustTest(sharesNum, fileSize, 100);
             setBigIntResults(results);
         } catch (error) {
             console.error('Error during analysis:', error);
@@ -93,7 +108,7 @@ const Analysis: React.FC = () => {
     return (
         <Container>
             <Typography variant="h5" gutterBottom>
-                Analyze Performance
+                Analyze Precision of not precise reconstruction
             </Typography>
             {!loading && (
                 <Button variant="contained" color="primary" onClick={startAnalysis}>
@@ -108,14 +123,9 @@ const Analysis: React.FC = () => {
             {!loading && (
                 <>
                     <Typography variant="h6" gutterBottom>
-                        BigInt Method Analysis
+                        Analysis of reconstruction of 1kb file, for each pair of shares (n, k). repeated 100 times.
                     </Typography>
                     <canvas id="bigIntChart"></canvas>
-
-                    <Typography variant="h6" gutterBottom>
-                        Byte Method Analysis
-                    </Typography>
-                    <canvas id="byteChart"></canvas>
                 </>
             )}
         </Container>
