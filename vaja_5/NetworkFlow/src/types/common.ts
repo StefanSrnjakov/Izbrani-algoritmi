@@ -13,35 +13,35 @@ export class Network {
     constructor(nodes: number) {
         this.network = Array.from({ length: nodes }, () => []);
     }
-    addEdge(u: number, v: number, capacity: number) {
-        this.network[u].push({
-            from: u,
-            to: v,
+    addEdge(fromNode: number, toNode: number, capacity: number) {
+        this.network[fromNode].push({
+            from: fromNode,
+            to: toNode,
             capacity,
-            reverseIndex: this.network[v].length,
+            reverseIndex: this.network[toNode].length,
             totalCapacity: capacity,
             isReverseConnection: false
         });
-        this.network[v].push({
-            from: v,
-            to: u,
+        this.network[toNode].push({
+            from: toNode,
+            to: fromNode,
             capacity: 0,
-            reverseIndex: this.network[u].length - 1,
+            reverseIndex: this.network[fromNode].length - 1,
             totalCapacity: capacity,
             isReverseConnection: true
         });
     }
-    bfs(s: number, t: number, parent: number[]): boolean {
+    bfs(source: number, sink: number, parentNodes: number[]): boolean {
         const visited = new Array(this.network.length).fill(false);
-        const queue: number[] = [s];
-        visited[s] = true;
+        const queue: number[] = [source];
+        visited[source] = true;
 
         while (queue.length > 0) {
-            const u = queue.shift()!;
-            for (const edge of this.network[u]) {
+            const currentNode = queue.shift()!;
+            for (const edge of this.network[currentNode]) {
                 if (!visited[edge.to] && edge.capacity > 0) {
-                    parent[edge.to] = u;
-                    if (edge.to === t) return true;
+                    parentNodes[edge.to] = currentNode;
+                    if (edge.to === sink) return true;
                     visited[edge.to] = true;
                     queue.push(edge.to);
                 }
@@ -50,34 +50,34 @@ export class Network {
         return false;
     }
     flattenGraph(): Edge[] {
-        return this.network.reduce((acc, edges) => [...acc, ...edges], []);
+        return this.network.reduce((accumulatedEdges, edges) => [...accumulatedEdges, ...edges], []);
     }
-    edmondsKarp(s: number, t: number): void {
-        const parent = new Array(this.network.length).fill(-1);
-        let maxFlow = 0;
+    edmondsKarp(source: number, sink: number): void {
+        const parentNodes = new Array(this.network.length).fill(-1);
+        let maximumFlow = 0;
 
-        console.log(parent);
-        while (this.bfs(s, t, parent)) {
+        console.log(parentNodes);
+        while (this.bfs(source, sink, parentNodes)) {
             let pathFlow = Infinity;
-            let v = t;
+            let currentNode = sink;
 
-            while (v !== s) {
-                const u = parent[v];
-                const edge = this.network[u].find((e) => e.to === v)!;
+            while (currentNode !== source) {
+                const previousNode = parentNodes[currentNode];
+                const edge = this.network[previousNode].find((e) => e.to === currentNode)!;
                 pathFlow = Math.min(pathFlow, edge.capacity);
-                v = u;
+                currentNode = previousNode;
             }
 
-            v = t;
-            while (v !== s) {
-                const u = parent[v];
-                const edge = this.network[u].find((e) => e.to === v)!;
+            currentNode = sink;
+            while (currentNode !== source) {
+                const previousNode = parentNodes[currentNode];
+                const edge = this.network[previousNode].find((e) => e.to === currentNode)!;
                 edge.capacity -= pathFlow;
-                this.network[v][edge.reverseIndex].capacity += pathFlow;
-                v = u;
+                this.network[currentNode][edge.reverseIndex].capacity += pathFlow;
+                currentNode = previousNode;
             }
 
-            maxFlow += pathFlow;
+            maximumFlow += pathFlow;
         }
     }
 }
