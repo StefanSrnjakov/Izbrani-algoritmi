@@ -1,83 +1,111 @@
 export type Edge = {
-    from: number,
-    to: number;
-    capacity: number;
-    reverseIndex: number,
-    totalCapacity: number,
-    isReverseConnection: boolean
+    from: string;
+    to: string;
+    remainingCapacity: number;
+    reverseIndex: number;
+    totalCapacity: number;
+    isReverseConnection: boolean;
 };
 
 export class Network {
     private readonly network: Edge[][] = [];
+    private readonly nodeIndexMap: { [key: string]: number } = {};
+    private readonly indexNodeMap: { [key: number]: string } = {};
+    private nextNodeIndex = 0;
 
-    constructor(nodes: number) {
-        this.network = Array.from({ length: nodes }, () => []);
+    constructor(nodes: string[]) {
+        nodes.forEach((node) => this.addNode(node));
     }
-    addEdge(fromNode: number, toNode: number, capacity: number) {
-        this.network[fromNode].push({
+
+    private addNode(nodeName: string): void {
+        if (!(nodeName in this.nodeIndexMap)) {
+            this.nodeIndexMap[nodeName] = this.nextNodeIndex;
+            this.indexNodeMap[this.nextNodeIndex] = nodeName;
+            this.network.push([]);
+            this.nextNodeIndex++;
+        }
+    }
+
+    addEdge(fromNode: string, toNode: string, capacity: number) {
+        this.addNode(fromNode);
+        this.addNode(toNode);
+
+        const fromIndex = this.nodeIndexMap[fromNode];
+        const toIndex = this.nodeIndexMap[toNode];
+
+        this.network[fromIndex].push({
             from: fromNode,
             to: toNode,
-            capacity,
-            reverseIndex: this.network[toNode].length,
+            remainingCapacity: capacity,
+            reverseIndex: this.network[toIndex].length,
             totalCapacity: capacity,
             isReverseConnection: false
         });
-        this.network[toNode].push({
+        this.network[toIndex].push({
             from: toNode,
             to: fromNode,
-            capacity: 0,
-            reverseIndex: this.network[fromNode].length - 1,
+            remainingCapacity: 0,
+            reverseIndex: this.network[fromIndex].length - 1,
             totalCapacity: capacity,
             isReverseConnection: true
         });
     }
-    bfs(source: number, sink: number, parentNodes: number[]): boolean {
-        const visited = new Array(this.network.length).fill(false);
-        const queue: number[] = [source];
-        visited[source] = true;
+
+    bfs(source: string, sink: string, parentNodes: { [key: string]: string }): boolean {
+        const visited = new Set<string>();
+        const queue: string[] = [source];
+        visited.add(source);
 
         while (queue.length > 0) {
             const currentNode = queue.shift()!;
-            for (const edge of this.network[currentNode]) {
-                if (!visited[edge.to] && edge.capacity > 0) {
+            const currentIndex = this.nodeIndexMap[currentNode];
+
+            for (const edge of this.network[currentIndex]) {
+                if (!visited.has(edge.to) && edge.remainingCapacity > 0) {
                     parentNodes[edge.to] = currentNode;
                     if (edge.to === sink) return true;
-                    visited[edge.to] = true;
+                    visited.add(edge.to);
                     queue.push(edge.to);
                 }
             }
         }
         return false;
     }
-    flattenGraph(): Edge[] {
-        return this.network.reduce((accumulatedEdges, edges) => [...accumulatedEdges, ...edges], []);
-    }
-    edmondsKarp(source: number, sink: number): void {
-        const parentNodes = new Array(this.network.length).fill(-1);
+
+    edmondsKarp(source: string, sink: string): number {
+        const parentNodes: { [key: string]: string } = {};
         let maximumFlow = 0;
 
-        console.log(parentNodes);
         while (this.bfs(source, sink, parentNodes)) {
             let pathFlow = Infinity;
             let currentNode = sink;
 
             while (currentNode !== source) {
                 const previousNode = parentNodes[currentNode];
-                const edge = this.network[previousNode].find((e) => e.to === currentNode)!;
-                pathFlow = Math.min(pathFlow, edge.capacity);
+                const previousIndex = this.nodeIndexMap[previousNode];
+                const edge = this.network[previousIndex].find((e) => e.to === currentNode)!;
+                pathFlow = Math.min(pathFlow, edge.remainingCapacity);
                 currentNode = previousNode;
             }
 
             currentNode = sink;
             while (currentNode !== source) {
                 const previousNode = parentNodes[currentNode];
-                const edge = this.network[previousNode].find((e) => e.to === currentNode)!;
-                edge.capacity -= pathFlow;
-                this.network[currentNode][edge.reverseIndex].capacity += pathFlow;
+                const previousIndex = this.nodeIndexMap[previousNode];
+                const edge = this.network[previousIndex].find((e) => e.to === currentNode)!;
+                edge.remainingCapacity -= pathFlow;
+                const reverseEdge = this.network[this.nodeIndexMap[currentNode]][edge.reverseIndex];
+                reverseEdge.remainingCapacity += pathFlow;
                 currentNode = previousNode;
             }
 
             maximumFlow += pathFlow;
         }
+
+        return maximumFlow;
+    }
+
+    flattenEdges(): Edge[] {
+        return this.network.reduce((accumulatedEdges, edges) => [...accumulatedEdges, ...edges], []).filter((edge) => !edge.isReverseConnection);
     }
 }

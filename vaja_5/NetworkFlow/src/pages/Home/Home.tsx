@@ -18,21 +18,22 @@ const Home: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
 
   useEffect(() => {
-    const network: Network = new Network(6);
+    const network: Network = new Network(['0', '1', '2', '3', '4', '5']);
     // const graph: Graph = Array.from({ length: 6 }, () => []);
-    network.addEdge(0, 1, 16);
-    network.addEdge(0, 2, 13);
-    network.addEdge(1, 2, 10);
-    network.addEdge(1, 3, 12);
-    network.addEdge(2, 4, 14);
-    network.addEdge(3, 2, 9);
-    network.addEdge(3, 5, 20);
-    network.addEdge(4, 3, 7);
-    network.addEdge(4, 5, 4);
-    network.edmondsKarp(0, 5);
+    network.addEdge('0', '1', 16);
+    network.addEdge('0', '2', 13);
+    network.addEdge('1', '2', 10);
+    network.addEdge('1', '3', 12);
+    network.addEdge('2', '4', 14);
+    network.addEdge('3', '2', 9);
+    network.addEdge('3', '5', 20);
+    network.addEdge('4', '3', 7);
+    network.addEdge('4', '5', 4);
+    console.log(network.edmondsKarp('0', '5'));
 
 
-    // console.log(network.flattenGraph());
+
+    console.log(network.flattenEdges());
 
 
   }, []);
