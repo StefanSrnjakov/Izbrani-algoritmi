@@ -1,87 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Container,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Stack,
-} from '@mui/material';
-import { Network } from '../../types/common';
+import React, { useState } from 'react';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import MaximumFlowCalculator from '../../components/MaximumFlowCalculator';
+import NetworkUI from '../../components/NetworkUI';
 
 const Home: React.FC = () => {
-  const [file, setFile] = useState<File | null>(null);
-  const [result, setResult] = useState<string | null>(null);
+  const [currentTab, setCurrentTab] = useState<number>(0);
 
-  useEffect(() => {
-    const network: Network = new Network(['0', '1', '2', '3', '4', '5']);
-    // const graph: Graph = Array.from({ length: 6 }, () => []);
-    network.addEdge('0', '1', 16);
-    network.addEdge('0', '2', 13);
-    network.addEdge('1', '2', 10);
-    network.addEdge('1', '3', 12);
-    network.addEdge('2', '4', 14);
-    network.addEdge('3', '2', 9);
-    network.addEdge('3', '5', 20);
-    network.addEdge('4', '3', 7);
-    network.addEdge('4', '5', 4);
-    console.log(network.edmondsKarp('0', '5'));
-
-
-
-    console.log(network.flattenEdges());
-
-
-  }, []);
-
-
-
-
-
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
-    }
-
-
-  };
-
-  const handleSubmit = () => {
-    // Placeholder for logic to process the file, source, and sink
-    setResult('Result will be displayed here.');
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setCurrentTab(newValue);
   };
 
   return (
-    <Container component="main" maxWidth="md">
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Maximum Flow Calculator
-        </Typography>
-
-        <Stack spacing={3}>
-          <Button variant="contained" component="label" color="primary">
-            Upload Graph File
-            <input type="file" hidden onChange={handleFileUpload} />
-          </Button>
-          {file && <Typography variant="body1">Uploaded File: {file.name}</Typography>}
-
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            Calculate Maximum Flow
-          </Button>
-
-          {result && (
-            <Paper elevation={1} style={{ padding: '10px' }}>
-              <Typography variant="h6">Results:</Typography>
-              <Typography variant="body1">{result}</Typography>
-            </Paper>
-          )}
-        </Stack>
-      </Paper>
+    <Container maxWidth="md">
+      <Typography variant="h4" gutterBottom>
+        Network Flow App
+      </Typography>
+      <Typography variant="body1" paragraph>
+        Solve maximum flow problems and visualize network structures.
+      </Typography>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs value={currentTab} onChange={handleTabChange} aria-label="Tabs for application sections">
+          <Tab label="Maximum Flow Calculator" />
+        </Tabs>
+      </Box>
+      <Box>
+        {/* Render the appropriate component based on the active tab */}
+        {currentTab === 0 && <MaximumFlowCalculator />}
+      </Box>
     </Container>
   );
 };
