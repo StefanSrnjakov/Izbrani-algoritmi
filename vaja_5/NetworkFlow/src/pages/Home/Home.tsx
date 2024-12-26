@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import MaximumFlowCalculator from '../../components/MaximumFlowCalculator';
-import NetworkUI from '../../components/NetworkUI';
+import PerformanceMetrics from '../../components/PerformanceMetrics';
 
 const Home: React.FC = () => {
   const [currentTab, setCurrentTab] = useState<number>(0);
@@ -25,11 +25,15 @@ const Home: React.FC = () => {
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={currentTab} onChange={handleTabChange} aria-label="Tabs for application sections">
           <Tab label="Maximum Flow Calculator" />
+          <Tab label="Performance Metrics" />
+
         </Tabs>
       </Box>
       <Box>
         {/* Render the appropriate component based on the active tab */}
         {currentTab === 0 && <MaximumFlowCalculator />}
+        {currentTab === 1 && <PerformanceMetrics />}
+
       </Box>
     </Container>
   );
